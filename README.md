@@ -6,22 +6,6 @@ A Python package for creating geospatial maps of WNL boroughs. Provides a set of
 
 ---
 
-## Installation
-
-Install using uv:
-
-```bash
-uv add wnl-mapkit
-```
-
-Or with pip:
-
-```bash
-pip install wnl-mapkit
-```
-
----
-
 ## Quick Start
 
 The typical workflow is:
