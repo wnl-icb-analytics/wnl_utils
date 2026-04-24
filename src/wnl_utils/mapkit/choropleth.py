@@ -1,5 +1,6 @@
 from .canvas import _current_canvas
 
+
 def plot_static_continuous_choropleth(
     gdf,
     column,
@@ -29,10 +30,10 @@ def plot_static_continuous_choropleth(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
-    fig = fig or _current_canvas['fig']
-    ax = ax or _current_canvas['ax']
+    fig = fig or _current_canvas["fig"]
+    ax = ax or _current_canvas["ax"]
 
-    colormap = 'RdYlBu_r' if reverse else 'RdYlBu'
+    colormap = "RdYlBu_r" if reverse else "RdYlBu"
     vmin = gdf[column].min() if vmin is None else vmin
     vmax = gdf[column].max() if vmax is None else vmax
 
@@ -86,8 +87,8 @@ def plot_static_categorical_choropleth(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
-    fig = fig or _current_canvas['fig']
-    ax = ax or _current_canvas['ax']
+    fig = fig or _current_canvas["fig"]
+    ax = ax or _current_canvas["ax"]
 
     colormap = "RdYlBu_r" if reverse else "RdYlBu"
 

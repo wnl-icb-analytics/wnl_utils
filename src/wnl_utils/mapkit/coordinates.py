@@ -1,10 +1,11 @@
 from .canvas import _current_canvas
 from ._constants import _POINT_STYLE_MAP
 
+
 def plot_static_coordinates(
     gdf,
     ax=None,
-    pointstyle='white',
+    pointstyle="white",
     pointsize=25,
     zorder=3,
     labels=False,
@@ -30,7 +31,7 @@ def plot_static_coordinates(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with coordinate layer added.
     """
-    ax = ax or _current_canvas['ax']
+    ax = ax or _current_canvas["ax"]
 
     if labels and label_column is None:
         raise ValueError("label_column must be provided when labels=True.")
@@ -39,9 +40,9 @@ def plot_static_coordinates(
 
     gdf.plot(
         ax=ax,
-        color=style['color'],
-        edgecolor=style['edgecolor'],
-        marker=style['marker'],
+        color=style["color"],
+        edgecolor=style["edgecolor"],
+        marker=style["marker"],
         markersize=pointsize,
         alpha=0.8,
         linewidth=0.5,
@@ -51,26 +52,27 @@ def plot_static_coordinates(
     if labels:
         for _, row in gdf.iterrows():
             cx, cy = row.geometry.coords[0]
-            name = row[label_column].replace(' ', '\n')
+            name = row[label_column].replace(" ", "\n")
 
             ax.annotate(
                 name,
                 xy=(cx, cy),
-                xycoords='data',
+                xycoords="data",
                 xytext=(0, -10),
-                textcoords='offset points',
-                ha='center',
-                va='top',
-                multialignment='center',
+                textcoords="offset points",
+                ha="center",
+                va="top",
+                multialignment="center",
                 fontsize=10,
-                color='black',
+                color="black",
                 bbox=dict(
-                    boxstyle='square,pad=0.15',
-                    fc='white',
-                    ec='none',
+                    boxstyle="square,pad=0.15",
+                    fc="white",
+                    ec="none",
                     alpha=0.7,
                 ),
                 zorder=zorder + 1,
             )
 
     return ax
+

@@ -7,6 +7,7 @@ This vignette shows how to use the WNL branded borough base layer with labelled 
 ## Data
 
 > In a Snowflake notebook, the query below would be written in SQL cells. The cell name becomes the variable name passed into `prepare_geo_data()`.
+The code below uses geographic objects from the `GEOSPATIAL_OBJECTS` schema.
 
 **SQL cell: `boundaries_df`** — Borough boundary geometries for all WNL boroughs
 
@@ -31,7 +32,7 @@ WHERE AREA_NAME IN (
 ## Plotting
 
 ```python
-import wnl_mapkit as wm
+import wnl_utils.mapkit as wm
 
 # Convert WKB geometry to GeoDataFrames
 boundaries_gdf = wm.prepare_geo_data(boundaries_df)
@@ -58,7 +59,7 @@ wm.plot_static_boundaries(
 
 ```
 
-![Result](map_outputs/wnl_fill.png)
+![Result](../map_outputs/wnl_fill.png)
 
 ---
 
@@ -66,3 +67,4 @@ wm.plot_static_boundaries(
 
 - `plot_wnl_boroughs_base()` applies WNL branded colours to each borough — use `fillstyle='pastel'` for a softer look, `'bold'` for stronger brand colours, and `'plain'` for plain blue. 
 - `plot_static_boundaries()` is called on the same GeoDataFrame to draw boundary lines and centroid labels on top of the filled polygons
+

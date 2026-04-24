@@ -1,6 +1,7 @@
 from .canvas import _current_canvas
 from ._constants import _WNL_PASTEL_COLOUR_MAP, _WNL_BOLD_COLOUR_MAP, _WNL_PLAIN_FILLCOLOR, _WNL_FALLBACK_COLOR
 
+
 def _plot_centroid_labels(gdf, ax, zorder, fontsize=16):
     """Private helper that plots area name annotations at each polygon's centroid.
 
@@ -11,22 +12,22 @@ def _plot_centroid_labels(gdf, ax, zorder, fontsize=16):
         fontsize (int): Font size for the labels. Defaults to 16.
     """
     for _, row in gdf.iterrows():
-        name = row['AREA_NAME'].replace(' ', '\n')
+        name = row["AREA_NAME"].replace(" ", "\n")
         cx, cy = row.geometry.centroid.coords[0]
 
         ax.annotate(
             name,
             xy=(cx, cy),
-            xycoords='data',
-            ha='center',
-            va='center',
-            multialignment='center',
+            xycoords="data",
+            ha="center",
+            va="center",
+            multialignment="center",
             fontsize=fontsize,
-            color='black',
+            color="black",
             bbox=dict(
-                boxstyle='square,pad=0.15',
-                fc='white',
-                ec='none',
+                boxstyle="square,pad=0.15",
+                fc="white",
+                ec="none",
                 alpha=0.7,
             ),
             zorder=zorder + 1,
@@ -37,7 +38,7 @@ def plot_static_boundaries(
     gdf,
     ax=None,
     linewidth=1,
-    linecolor='white',
+    linecolor="white",
     zorder=2,
     labels=False,
 ):
@@ -55,7 +56,7 @@ def plot_static_boundaries(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with boundary layer added.
     """
-    ax = ax or _current_canvas['ax']
+    ax = ax or _current_canvas["ax"]
 
     gdf.boundary.plot(
         ax=ax,
@@ -70,14 +71,13 @@ def plot_static_boundaries(
     return ax
 
 
-
 def plot_wnl_boroughs_base(
     gdf,
     ax=None,
     linewidth=1,
-    linecolor='white',
+    linecolor="white",
     zorder=2,
-    fillstyle='pastel',
+    fillstyle="pastel",
 ):
     """Plots WNL borough polygons with branded fill colours.
 
@@ -95,9 +95,9 @@ def plot_wnl_boroughs_base(
     Returns:
         matplotlib.axes.Axes
     """
-    ax = ax or _current_canvas['ax']
+    ax = ax or _current_canvas["ax"]
 
-    if fillstyle == 'plain':
+    if fillstyle == "plain":
         gdf.plot(
             ax=ax,
             color=_WNL_PLAIN_FILLCOLOR,
@@ -106,16 +106,16 @@ def plot_wnl_boroughs_base(
             zorder=zorder,
         )
 
-    elif fillstyle in ('pastel', 'bold'):
+    elif fillstyle in ("pastel", "bold"):
         colour_map = (
             _WNL_PASTEL_COLOUR_MAP
-            if fillstyle == 'pastel'
+            if fillstyle == "pastel"
             else _WNL_BOLD_COLOUR_MAP
         )
 
         colors = [
             colour_map.get(name, _WNL_FALLBACK_COLOR)
-            for name in gdf['AREA_NAME']
+            for name in gdf["AREA_NAME"]
         ]
 
         gdf.plot(
@@ -133,3 +133,4 @@ def plot_wnl_boroughs_base(
         )
 
     return ax
+

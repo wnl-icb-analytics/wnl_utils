@@ -7,6 +7,7 @@ This vignette shows how to produce a detailed map for a single borough, combinin
 ## Data
 
 > In a Snowflake notebook, the queries below would be written in SQL cells. The cell name becomes the variable name passed into `prepare_geo_data()`.
+The code below uses geographic objects from the `GEOSPATIAL_OBJECTS` schema.
 
 **SQL cell: `df`** — LSOA-level IMD deciles for Barnet
 
@@ -56,7 +57,7 @@ AND PROVIDER_CODE = 'RAL'
 ## Plotting
 
 ```python
-import wnl_mapkit as wm
+import wnl_utils.mapkit as wm
 
 # Convert WKB geometry to GeoDataFrames
 imd_gdf = wm.prepare_geo_data(df)
@@ -97,7 +98,7 @@ wm.plot_static_coordinates(
 )
 ```
 
-![Result](map_outputs/barnet_deep_dive.png)
+![Result](../map_outputs/barnet_deep_dive.png)
 
 ---
 
@@ -106,3 +107,4 @@ wm.plot_static_coordinates(
 - `categories=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]` explicitly sets the full decile range so the legend is consistent even if some deciles are not present in the data
 - `reverse=False` means decile 1 (most deprived) maps to red and decile 10 (least deprived) maps to blue
 - `pointsize=300` and `labels=True` work well at a single borough and provider scale — at WNL-wide scale these would clutter the map. 
+
