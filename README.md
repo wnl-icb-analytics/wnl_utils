@@ -1,6 +1,6 @@
 # wnl-mapkit
 
-A Python package for creating geospatial maps of WNL boroughs. Provides a set of composable plotting functions for building choropleth maps, boundary layers, and point overlays using GeoPandas and Matplotlib.
+A Python package for creating geospatial maps. Provides a set of composable plotting functions for building choropleth maps, boundary layers, and point overlays using GeoPandas and Matplotlib. Includes built-in WNL branded styling for borough base layers.
 
 > **Note:** This package is designed primarily for use in Snowflake notebooks. It can be used in an IDE, but a Snowflake connection will need to be established and query results converted with `.to_pandas()` before use.
 
