@@ -1,12 +1,61 @@
-# wnl-mapkit
+# wnl-utils
+
+`wnl-utils` is a utility package namespace for WNL Python tooling.
+
+The first subpackage is `wnl_utils.mapkit`, which provides composable geospatial
+plotting helpers for choropleths, boundary layers, and point overlays.
+
+## Accessing the package in different environments
+
+### 1. Access in snowflake notebook
+TO BE ADDED
+
+#### Build and publish for Snowflake (advanced maintainer)
+
+Build a wheel/sdist:
+
+```bash
+python -m build
+```
+
+Artifacts are produced in `dist/`.
+
+Upload to an internal Snowflake stage using the Snowflake-Deployment repo (details to be added)
+
+---
+### 2. Use in a local IDE (Install from GitHub)
+
+#### pip
+
+```bash
+pip install "git+https://github.com/wnl-icb-analytics/wnl_utils.git"
+```
+
+#### uv
+
+```bash
+uv add "git+https://github.com/wnl-icb-analytics/wnl_utils.git"
+```
+
+
+
+## wnl-mapkit
 
 A Python package for creating geospatial maps. Provides a set of composable plotting functions for building choropleth maps, boundary layers, and point overlays using GeoPandas and Matplotlib. Includes built-in WNL branded styling for borough base layers.
+
+### Vignettes
+
+Worked example templates for onboarding and implementation are available in:
+
+- `examples/vignettes/01_choropleth.md`
+- `examples/vignettes/02_wnl_fill.md`
+- `examples/vignettes/03_barnet_deepdive.md`
 
 > **Note:** This package is designed primarily for use in Snowflake notebooks. It can be used in an IDE, but a Snowflake connection will need to be established and query results converted with `.to_pandas()` before use.
 
 ---
 
-## Quick Start
+### Quick Start
 
 The typical workflow is:
 
@@ -20,7 +69,7 @@ In a Snowflake notebook, data is queried using a SQL cell. The name of the SQL c
 For example, if your SQL cell is named my_query:
 
 ```python
-import wnl_mapkit as wm
+import wnl_utils.mapkit as wm
 
 # Convert the SQL cell result to a GeoDataFrame
 gdf = wm.prepare_geo_data(my_query)
@@ -34,7 +83,7 @@ wm.plot_static_boundaries(gdf, labels=True)
 ### In an IDE
 
 ```python
-import wnl_mapkit as wm
+import wnl_utils.mapkit as wm
 from snowflake.snowpark import Session
 
 # Establish Snowflake connection
@@ -149,3 +198,4 @@ Plots point coordinates as a map layer.
 | `zorder` | `int` | Layer order. Defaults to `3` |
 | `labels` | `bool` | If `True`, plots point name annotations. Defaults to `False` |
 | `label_column` | `str` | Column to use for labels. Required if `labels=True` |
+
