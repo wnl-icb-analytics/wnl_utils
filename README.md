@@ -16,14 +16,14 @@ The typical workflow is:
 
 ### In a Snowflake Notebook
 
+In a Snowflake notebook, data is queried using a SQL cell. The name of the SQL cell becomes the DataFrame variable you pass directly into prepare_geo_data().
+For example, if your SQL cell is named my_query:
+
 ```python
 import wnl_mapkit as wm
 
-# Query Snowflake
-df = session.sql("SELECT * FROM my_borough_table").to_pandas()
-
-# Convert WKB geometry to GeoDataFrame
-gdf = wm.prepare_geo_data(df)
+# Convert the SQL cell result to a GeoDataFrame
+gdf = wm.prepare_geo_data(my_query)
 
 # Create canvas and plot
 wm.plot_map_canvas()
