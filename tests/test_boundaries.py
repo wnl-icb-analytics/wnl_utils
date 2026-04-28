@@ -6,6 +6,7 @@
 # - test_plot_static_boundaries_uses_current_canvas_when_ax_missing:
 #   Ensure function uses internal current canvas if ax is not passed.
 #
+#
 # - test_plot_static_boundaries_with_labels_does_not_error:
 #   Include AREA_NAME and verify label mode runs successfully.
 #

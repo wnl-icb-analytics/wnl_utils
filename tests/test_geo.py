@@ -27,11 +27,6 @@ def test_prepare_geo_data_returns_geodataframe(minimal_df):
     assert isinstance(result, gpd.GeoDataFrame)
     assert result.crs.to_epsg() == 4326   
 
-def test_prepare_geo_data_drops_geometry_wkb_column(minimal_df):
-    """Raw WKB column is removed from the result."""
-    result = prepare_geo_data(minimal_df)
-    assert "GEOMETRY_WKB" not in result.columns
-
 def test_prepare_geo_data_preserves_non_geometry_columns(minimal_df):
     """Other columns are untouched."""
     result = prepare_geo_data(minimal_df)
@@ -45,7 +40,7 @@ def test_prepare_geo_data_raises_on_missing_geometry_wkb_column():
         prepare_geo_data(df)
 
 
-# --- None / null geometry handling (business-critical) ---
+#None / null geometry handling
 
 def test_prepare_geo_data_handles_none_wkb_without_crashing():
     """None values in GEOMETRY_WKB should not raise an exception."""

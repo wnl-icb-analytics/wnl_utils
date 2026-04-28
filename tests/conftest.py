@@ -2,6 +2,8 @@
 import pytest
 from shapely.geometry import Polygon
 from shapely import wkb
+import matplotlib
+matplotlib.use("Agg") 
 
 @pytest.fixture
 def valid_wkb():
