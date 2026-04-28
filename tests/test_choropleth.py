@@ -1,20 +1,95 @@
-# Expected tests for choropleth plotting helpers
-#
-# - test_plot_static_continuous_choropleth_runs_with_defaults:
-#   Verify function runs on a tiny GeoDataFrame and returns axes.
-#
-# - test_plot_static_continuous_choropleth_respects_vmin_vmax:
-#   Pass explicit vmin/vmax and verify function accepts them without error.
-#
-# - test_plot_static_continuous_choropleth_reverse_mode_runs:
-#   Verify reverse=True path executes successfully.
-#
-# - test_plot_static_categorical_choropleth_runs_with_categories:
-#   Verify categorical plotting executes with supplied category order.
-#
-# - test_plot_static_categorical_choropleth_reverse_mode_runs:
-#   Verify reverse=True path executes successfully for categorical mode.
-#
-# - test_choropleth_functions_use_current_canvas_when_fig_ax_missing:
-#   Ensure both functions use internal current canvas by default.
+import pytest
+import geopandas as gpd
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+from wnl_utils.mapkit.choropleth import plot_static_categorical_choropleth, plot_static_continuous_choropleth
+
+
+@pytest.fixture
+def choropleth_gdf(valid_polygon):
+    """Minimal GeoDataFrame with geometry, AREA_NAME, and plotting data"""
+    return gpd.GeoDataFrame(
+        {"AREA_NAME": ["Test Borough"],
+        "TEST_COLUMN" : [3]},
+        geometry=[valid_polygon],
+        crs="EPSG:4326"
+    )
+
+
+def test_continuous_choropleth_raises_without_legend_title(choropleth_gdf):
+    fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="legend_title is required"):
+        plot_static_continuous_choropleth(
+            choropleth_gdf, column="TEST_COLUMN", legend_title=None, ax=ax, fig=fig
+        )
+    plt.close("all")
+
+
+def test_continuous_choropleth_runs_without_title(choropleth_gdf):
+    fig, ax = plt.subplots()
+    result = plot_static_continuous_choropleth(
+        choropleth_gdf, column="TEST_COLUMN", legend_title="My Legend", ax=ax, fig=fig
+    )
+    assert isinstance(result, Axes)
+    plt.close("all")
+
+def test_categorical_choropleth_raises_without_legend_title(choropleth_gdf):
+    fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="legend_title is required"):
+        plot_static_categorical_choropleth(
+            choropleth_gdf, column="TEST_COLUMN", legend_title=None, ax=ax, fig=fig, categories=[3]
+        )
+    plt.close("all")
+
+
+def test_categorical_choropleth_runs_without_title(choropleth_gdf):
+    fig, ax = plt.subplots()
+    result = plot_static_categorical_choropleth(
+        choropleth_gdf, column="TEST_COLUMN", legend_title="My Legend", ax=ax, fig=fig, categories=[3]
+    )
+    assert isinstance(result, Axes)
+    plt.close("all")
+
+def test_plot_static_continuous_choropleth_respects_vmin_vmax(choropleth_gdf):
+    fig, ax = plt.subplots()
+    result = plot_static_continuous_choropleth(
+        choropleth_gdf,
+        column="TEST_COLUMN",
+        legend_title="My Legend",
+        ax=ax,
+        fig=fig,
+        vmin=0,
+        vmax=10,
+    )
+    assert isinstance(result, Axes)
+    plt.close("all")
+
+
+def test_plot_static_categorical_choropleth_runs_with_categories(choropleth_gdf):
+    fig, ax = plt.subplots()
+    result = plot_static_categorical_choropleth(
+        choropleth_gdf,
+        column="TEST_COLUMN",
+        legend_title="My Legend",
+        categories=[3],
+        ax=ax,
+        fig=fig,
+    )
+    assert isinstance(result, Axes)
+    plt.close("all")
+
+def test_plot_static_categorical_choropleth_raises_without_categories(choropleth_gdf):
+    fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="categories is required"):
+        plot_static_categorical_choropleth(
+            choropleth_gdf,
+            column="TEST_COLUMN",
+            legend_title="My Legend",
+            ax=ax,
+            fig=fig,
+        )
+    plt.close("all")
+
+
 
