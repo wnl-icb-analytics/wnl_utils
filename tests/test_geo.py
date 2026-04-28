@@ -34,9 +34,8 @@ def test_prepare_geo_data_preserves_non_geometry_columns(minimal_df):
     assert result["area_code"].iloc[0] == "E01000001" 
 
 def test_prepare_geo_data_raises_on_missing_geometry_wkb_column():
-    """Raises KeyError when GEOMETRY_WKB column is absent."""
     df = pd.DataFrame({"some_other_col": [1, 2, 3]})
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError, match="GEOMETRY_WKB"):
         prepare_geo_data(df)
 
 
@@ -74,5 +73,3 @@ def test_prepare_geo_data_mixed_valid_and_none_wkb(valid_wkb):
     assert result.geometry.iloc[0] is not None      # valid rows intact
     assert result.geometry.iloc[1] is None          # nulls preserved as None
     assert result.geometry.notna().sum() == 2       # exactly 2 valid geometries
-
-
