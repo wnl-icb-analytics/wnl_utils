@@ -1,7 +1,6 @@
 import pytest
 import geopandas as gpd
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from wnl_utils.mapkit.choropleth import plot_static_categorical_choropleth, plot_static_continuous_choropleth
 
