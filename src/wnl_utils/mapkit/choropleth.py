@@ -1,11 +1,10 @@
 from .canvas import _current_canvas
 
-
 def plot_static_continuous_choropleth(
     gdf,
     column,
-    title,
-    legend_title,
+    legend_title,       
+    title=None,          
     fig=None,
     ax=None,
     vmin=None,
@@ -13,8 +12,8 @@ def plot_static_continuous_choropleth(
     reverse=False,
     zorder=1,
 ):
-    """Plots a choropleth map layer onto a Matplotlib axes.
 
+    """Plots a choropleth map layer onto a Matplotlib axes.
     Args:
         gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
         column (str): Column name to use for the choropleth colour scale.
@@ -26,14 +25,48 @@ def plot_static_continuous_choropleth(
         vmax (float): Maximum value for the colour scale. Defaults to column maximum.
         reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
         zorder (int): Layering order. Higher values plot on top. Defaults to 1.
-
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
+
+    if gdf is None:
+        raise ValueError(
+            "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
+        )
+
+    if "geometry" not in gdf.columns:
+        raise ValueError(
+            "gdf must contain a valid geometry column. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
+    if gdf.geometry.notna().sum() == 0:
+        raise ValueError(
+            "gdf contains no valid geometries. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+    
+    if column is None:
+        raise ValueError(
+            "column is required. Provide a column with data values for plotting."
+        )
+
+    if legend_title is None:
+        raise ValueError(
+            "legend_title is required. Provide a label for the choropleth colour scale."
+        )
+
     fig = fig or _current_canvas["fig"]
     ax = ax or _current_canvas["ax"]
+   
+    if ax is None:
+        raise RuntimeError(
+            "No axes object found. Call plot_map_canvas() before plotting, "
+            "or pass an explicit ax argument."
+        )
 
     colormap = "RdYlBu_r" if reverse else "RdYlBu"
+
     vmin = gdf[column].min() if vmin is None else vmin
     vmax = gdf[column].max() if vmax is None else vmax
 
@@ -52,10 +85,11 @@ def plot_static_continuous_choropleth(
         linewidth=0.1,
         zorder=zorder,
         vmin=vmin,
-        vmax=vmax,
+        vmax=vmax
     )
-
-    fig.suptitle(title, fontsize=20, x=0.5, y=0.97)
+    
+    if title:
+        fig.suptitle(title, fontsize=20, x=0.5, y=0.97)
 
     return ax
 
@@ -63,16 +97,16 @@ def plot_static_continuous_choropleth(
 def plot_static_categorical_choropleth(
     gdf,
     column,
-    title,
     legend_title,
-    categories,
+    categories=None,     
+    title=None,
     fig=None,
     ax=None,
     reverse=False,
     zorder=1,
 ):
-    """Plots a categorical choropleth map layer onto a Matplotlib axes.
 
+    """Plots a categorical choropleth map layer onto a Matplotlib axes.
     Args:
         gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
         column (str): Column name to use for the choropleth categories.
@@ -83,12 +117,51 @@ def plot_static_categorical_choropleth(
         ax (matplotlib.axes.Axes): Axes object to plot onto. Defaults to current canvas.
         reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
         zorder (int): Layering order. Higher values plot on top. Defaults to 1.
-
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
+
+    if gdf is None:
+        raise ValueError(
+            "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
+        )
+
+    if "geometry" not in gdf.columns:
+        raise ValueError(
+            "gdf must contain a valid geometry column. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
+    if gdf.geometry.notna().sum() == 0:
+        raise ValueError(
+            "gdf contains no valid geometries. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+    
+    if column is None:
+        raise ValueError(
+            "column is required. Provide a column with data values for plotting."
+        )
+
+    if legend_title is None:
+        raise ValueError(
+            "legend_title is required. Provide a label for the choropleth legend."
+        )
+
+    if categories is None:
+        raise ValueError(
+            "categories is required. Provide an ordered list of category values "
+            "to display, e.g. categories=[1, 2, 3, 4, 5] or categories=['low', 'medium', 'high']."
+        )
+
     fig = fig or _current_canvas["fig"]
     ax = ax or _current_canvas["ax"]
+    
+    if ax is None:
+        raise RuntimeError(
+            "No axes object found. Call plot_map_canvas() before plotting, "
+            "or pass an explicit ax argument."
+        )
 
     colormap = "RdYlBu_r" if reverse else "RdYlBu"
 
@@ -108,7 +181,8 @@ def plot_static_categorical_choropleth(
         zorder=zorder,
     )
 
-    fig.suptitle(title, fontsize=20, x=0.5, y=0.97)
+    if title:
+        fig.suptitle(title, fontsize=20, x=0.5, y=0.97)
 
     return ax
 

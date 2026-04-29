@@ -56,7 +56,31 @@ def plot_static_boundaries(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with boundary layer added.
     """
+
+    if gdf is None:
+        raise ValueError(
+            "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
+        )
+
+    if "geometry" not in gdf.columns:
+        raise ValueError(
+            "gdf must contain a valid geometry column. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
+    if gdf.geometry.notna().sum() == 0:
+        raise ValueError(
+            "gdf contains no valid geometries. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+            
     ax = ax or _current_canvas["ax"]
+
+    if ax is None:
+        raise RuntimeError(
+            "No axes object found. Call plot_map_canvas() before plotting, "
+            "or pass an explicit ax argument."
+        )
 
     gdf.boundary.plot(
         ax=ax,
@@ -95,7 +119,30 @@ def plot_wnl_boroughs_base(
     Returns:
         matplotlib.axes.Axes
     """
+    if gdf is None:
+        raise ValueError(
+            "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
+        )
+
+    if "geometry" not in gdf.columns:
+        raise ValueError(
+            "gdf must contain a valid geometry column. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
+    if gdf.geometry.notna().sum() == 0:
+        raise ValueError(
+            "gdf contains no valid geometries. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
     ax = ax or _current_canvas["ax"]
+
+    if ax is None:
+        raise RuntimeError(
+            "No axes object found. Call plot_map_canvas() before plotting, "
+            "or pass an explicit ax argument."
+        )
 
     if fillstyle == "plain":
         gdf.plot(
