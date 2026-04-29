@@ -13,6 +13,22 @@ def plot_static_continuous_choropleth(
     zorder=1,
 ):
 
+    """Plots a choropleth map layer onto a Matplotlib axes.
+    Args:
+        gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
+        column (str): Column name to use for the choropleth colour scale.
+        title (str): Title of the map.
+        legend_title (str): Label for the legend colourbar.
+        fig (matplotlib.figure.Figure): Figure object. Defaults to current canvas.
+        ax (matplotlib.axes.Axes): Axes object to plot onto. Defaults to current canvas.
+        vmin (float): Minimum value for the colour scale. Defaults to column minimum.
+        vmax (float): Maximum value for the colour scale. Defaults to column maximum.
+        reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
+        zorder (int): Layering order. Higher values plot on top. Defaults to 1.
+    Returns:
+        ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
+    """
+
     if gdf is None:
         raise ValueError(
             "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
@@ -90,6 +106,21 @@ def plot_static_categorical_choropleth(
     zorder=1,
 ):
 
+    """Plots a categorical choropleth map layer onto a Matplotlib axes.
+    Args:
+        gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
+        column (str): Column name to use for the choropleth categories.
+        title (str): Title of the map.
+        legend_title (str): Label for the legend.
+        categories (list): Ordered list of category values to display, e.g. range(1, 11).
+        fig (matplotlib.figure.Figure): Figure object. Defaults to current canvas.
+        ax (matplotlib.axes.Axes): Axes object to plot onto. Defaults to current canvas.
+        reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
+        zorder (int): Layering order. Higher values plot on top. Defaults to 1.
+    Returns:
+        ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
+    """
+
     if gdf is None:
         raise ValueError(
             "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
@@ -111,7 +142,7 @@ def plot_static_categorical_choropleth(
         raise ValueError(
             "column is required. Provide a column with data values for plotting."
         )
-        
+
     if legend_title is None:
         raise ValueError(
             "legend_title is required. Provide a label for the choropleth legend."
