@@ -73,3 +73,14 @@ def test_prepare_geo_data_mixed_valid_and_none_wkb(valid_wkb):
     assert result.geometry.iloc[0] is not None      # valid rows intact
     assert result.geometry.iloc[1] is None          # nulls preserved as None
     assert result.geometry.notna().sum() == 2       # exactly 2 valid geometries
+
+
+def test_prepare_geo_data_warns_on_none_geometries(capsys):
+    df = pd.DataFrame({
+        "GEOMETRY_WKB": [None],
+        "area_code": ["E01000999"]
+    })
+    prepare_geo_data(df)
+    captured = capsys.readouterr()
+    assert "1 row(s)" in captured.out
+    assert "could not be mapped to a geography" in captured.out

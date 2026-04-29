@@ -37,5 +37,3 @@ def test_plot_static_coordinates_with_labels_runs_when_column_present(point_gdf)
     result = plot_static_coordinates(point_gdf, ax=ax, labels=True, label_column="LOCATION_NAME")
     assert isinstance(result, Axes)
     plt.close("all")
-
-

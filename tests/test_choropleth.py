@@ -90,5 +90,25 @@ def test_plot_static_categorical_choropleth_raises_without_categories(choropleth
         )
     plt.close("all")
 
+def test_plot_static_continuous_choropleth_raises_without_canvas(choropleth_gdf):
+    """Raises RuntimeError when no ax is passed and canvas has not been initialised."""
+    with pytest.raises(RuntimeError, match="plot_map_canvas"):
+        plot_static_continuous_choropleth(
+            choropleth_gdf,
+            column="TEST_COLUMN",
+            legend_title="My Legend",
+        )
+
+
+def test_plot_static_categorical_choropleth_raises_without_canvas(choropleth_gdf):
+    """Raises RuntimeError when no ax is passed and canvas has not been initialised."""
+    with pytest.raises(RuntimeError, match="plot_map_canvas"):
+        plot_static_categorical_choropleth(
+            choropleth_gdf,
+            column="TEST_COLUMN",
+            legend_title="My Legend",
+            categories=[3],
+        )
+
 
 
