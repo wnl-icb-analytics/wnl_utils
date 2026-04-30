@@ -22,6 +22,14 @@ def prepare_geo_data(df):
         )
 
     df["geometry"] = df["GEOMETRY_WKB"].apply(lambda x: wkb.loads(x) if x is not None else None)
+
+    null_count = df["geometry"].isna().sum()
+    if null_count > 0:
+        print( f"Warning: {null_count} row(s) could not be mapped to a geography. "
+        "This may indicate a join issue between the data table and the geography table, "
+        "or that some areas have no corresponding boundary (e.g. filler or non-standard codes). "
+        "These rows will not be plotted.")
+
     gdf = gpd.GeoDataFrame(df.drop(columns=["GEOMETRY_WKB"]), geometry="geometry", crs="EPSG:4326")
     return gdf
 

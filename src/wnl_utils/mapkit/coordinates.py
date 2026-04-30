@@ -31,10 +31,35 @@ def plot_static_coordinates(
     Returns:
         ax (matplotlib.axes.Axes): Axes object with coordinate layer added.
     """
-    ax = ax or _current_canvas["ax"]
+
+    if gdf is None:
+        raise ValueError(
+            "gdf is required. Provide a GeoDataFrame prepared with prepare_geo_data()."
+        )
+
+    if "geometry" not in gdf.columns:
+        raise ValueError(
+            "gdf must contain a valid geometry column. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
+
+    if gdf.geometry.notna().sum() == 0:
+        raise ValueError(
+            "gdf contains no valid geometries. "
+            "Ensure your data has been prepared using prepare_geo_data()."
+        )
 
     if labels and label_column is None:
         raise ValueError("label_column must be provided when labels=True.")
+    
+    
+    ax = ax or _current_canvas["ax"]
+
+    if ax is None:
+        raise RuntimeError(
+            "No axes object found. Call plot_map_canvas() before plotting, "
+            "or pass an explicit ax argument."
+        )
 
     style = _POINT_STYLE_MAP[pointstyle]
 

@@ -1,11 +1,16 @@
-# Expected tests for import surface
-#
-# - test_import_mapkit_package:
-#   Verify `import wnl_utils.mapkit` succeeds.
-#
-# - test_public_api_symbols_present:
-#   Verify expected public functions are exposed on `wnl_utils.mapkit`.
-#
-# - test_version_metadata_available (optional):
-#   Verify package metadata/version can be discovered if exposed.
 
+import wnl_utils.mapkit as mapkit
+
+
+def test_import_mapkit_package():
+    """Package imports without error."""
+    import wnl_utils.mapkit
+
+
+def test_public_api_symbols_present():
+    """Expected public functions are accessible on wnl_utils.mapkit."""
+    assert hasattr(mapkit, "prepare_geo_data")
+    assert hasattr(mapkit, "plot_static_boundaries")
+    assert hasattr(mapkit, "plot_wnl_boroughs_base")
+    assert hasattr(mapkit, "plot_map_canvas")
+    assert hasattr(mapkit, "get_map_canvas")
