@@ -165,14 +165,21 @@ def plot_static_categorical_choropleth(
     colormap = "RdYlBu_r" if reverse else "RdYlBu"
 
     if categories is not None:
+        cat_type = type(categories[0])
+        unmatched = {val for val in gdf[column].dropna().unique() if cat_type(val) not in set(categories)}
+        if unmatched:
+            raise ValueError(
+                f"Column '{column}' contains values not found in categories: {sorted(unmatched)}. "
+                "Ensure all values in the column are represented in the categories list."
+            )
+
         gdf[column] = pd.Categorical(gdf[column], categories=categories, ordered=True)
 
         cmap = plt.colormaps[colormap].resampled(len(categories))
-        # Store as hex strings — avoids pandas misinterpreting RGBA tuples as MultiIndex keys
         category_colors = {cat: matplotlib.colors.to_hex(cmap(i)) for i, cat in enumerate(categories)}
 
         colors = [category_colors.get(val, "#000000") for val in gdf[column]]
-
+        
         gdf.plot(
             color=colors,
             ax=ax,
