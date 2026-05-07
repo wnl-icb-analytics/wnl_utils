@@ -8,7 +8,21 @@ plotting helpers for choropleths, boundary layers, and point overlays.
 ## Accessing the package in different environments
 
 ### 1. Access in snowflake notebook
-TO BE ADDED
+```python
+from snowflake.snowpark.context import get_active_session
+import subprocess, sys
+
+session = get_active_session()
+session.file.get(
+    "@EXTERNAL_ACCESS.\"WNL-UTILS\".STG__PYTHON_FILES/wnl-utils/wnl_utils-0.1.1-py3-none-any.whl",
+    "/tmp"
+)
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install",
+    "/tmp/wnl_utils-0.1.1-py3-none-any.whl"
+])
+print("wnl_utils installed successfully")
+```
 
 #### Build and publish for Snowflake (advanced maintainer)
 
@@ -67,6 +81,12 @@ The typical workflow is:
 
 In a Snowflake notebook, data is queried using a SQL cell. The name of the SQL cell becomes the DataFrame variable you pass directly into prepare_geo_data().
 For example, if your SQL cell is named my_query:
+
+```SQL
+#my_query
+SELECT *
+FROM my_borough_table
+```
 
 ```python
 import wnl_utils.mapkit as wm
@@ -181,7 +201,7 @@ Plots a categorical choropleth map layer.
 | `column` | `str` | Column to use for categories |
 | `title` | `str` | Map title |
 | `legend_title` | `str` | Label for the legend |
-| `categories` | `list` | Ordered list of category values, e.g. `range(1, 11)` |
+| `categories` | `list` | Ordered list of category values, e.g. `["60-62", "62-64", "64-66", "66-68", "68+"]` |
 | `reverse` | `bool` | If `True`, reverses the colourmap. Defaults to `False` |
 | `zorder` | `int` | Layer order. Defaults to `1` |
 
