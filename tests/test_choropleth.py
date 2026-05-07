@@ -255,5 +255,18 @@ def test_categorical_choropleth_raises_without_column(choropleth_gdf):
         )
     plt.close("all")
 
+def test_categorical_choropleth_raises_on_unmatched_values(choropleth_gdf):
+    fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="not found in categories"):
+        plot_static_categorical_choropleth(
+            choropleth_gdf,
+            column="TEST_COLUMN",
+            legend_title="My Legend",
+            categories=[1, 2],
+            ax=ax,
+            fig=fig,
+        )
+    plt.close("all")
+
 
 
