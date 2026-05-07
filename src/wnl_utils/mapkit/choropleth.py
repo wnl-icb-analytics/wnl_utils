@@ -1,4 +1,9 @@
 from .canvas import _current_canvas
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt 
+import matplotlib.patches as mpatches 
+
 
 def plot_static_continuous_choropleth(
     gdf,
@@ -137,7 +142,7 @@ def plot_static_categorical_choropleth(
             "gdf contains no valid geometries. "
             "Ensure your data has been prepared using prepare_geo_data()."
         )
-    
+
     if column is None:
         raise ValueError(
             "column is required. Provide a column with data values for plotting."
@@ -148,15 +153,9 @@ def plot_static_categorical_choropleth(
             "legend_title is required. Provide a label for the choropleth legend."
         )
 
-    if categories is None:
-        raise ValueError(
-            "categories is required. Provide an ordered list of category values "
-            "to display, e.g. categories=[1, 2, 3, 4, 5] or categories=['low', 'medium', 'high']."
-        )
-
     fig = fig or _current_canvas["fig"]
     ax = ax or _current_canvas["ax"]
-    
+
     if ax is None:
         raise RuntimeError(
             "No axes object found. Call plot_map_canvas() before plotting, "
@@ -165,24 +164,51 @@ def plot_static_categorical_choropleth(
 
     colormap = "RdYlBu_r" if reverse else "RdYlBu"
 
-    gdf.plot(
-        column=column,
-        cmap=colormap,
-        ax=ax,
-        categorical=True,
-        categories=categories,
-        legend=True,
-        legend_kwds={
-            "title": legend_title,
-            "loc": "lower right",
-        },
-        edgecolor="black",
-        linewidth=0.1,
-        zorder=zorder,
-    )
+    if categories is not None:
+        gdf[column] = pd.Categorical(gdf[column], categories=categories, ordered=True)
+
+        cmap = plt.colormaps[colormap].resampled(len(categories))
+        # Store as hex strings — avoids pandas misinterpreting RGBA tuples as MultiIndex keys
+        category_colors = {cat: matplotlib.colors.to_hex(cmap(i)) for i, cat in enumerate(categories)}
+
+        colors = [category_colors.get(val, "#000000") for val in gdf[column]]
+
+        gdf.plot(
+            color=colors,
+            ax=ax,
+            edgecolor="black",
+            linewidth=0.1,
+            zorder=zorder,
+        )
+
+        handles = [
+            mpatches.Patch(facecolor=category_colors[cat], edgecolor="black", label=str(cat))
+            for cat in categories
+        ]
+
+        ax.legend(
+            handles=handles,
+            title=legend_title,
+            loc="lower right",
+        )
+
+    else:
+        gdf.plot(
+            column=column,
+            cmap=colormap,
+            ax=ax,
+            categorical=True,
+            legend=True,
+            legend_kwds={
+                "title": legend_title,
+                "loc": "lower right",
+            },
+            edgecolor="black",
+            linewidth=0.1,
+            zorder=zorder,
+        )
 
     if title:
         fig.suptitle(title, fontsize=20, x=0.5, y=0.97)
 
     return ax
-
