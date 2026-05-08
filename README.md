@@ -178,7 +178,6 @@ Plots boundary outlines with optional area name labels.
 
 ### `plot_static_continuous_choropleth(gdf, column, title, legend_title, ...)`
 Plots a continuous choropleth map layer.
-
 | Parameter | Type | Description |
 |---|---|---|
 | `gdf` | `GeoDataFrame` | GeoDataFrame with data and geometry |
@@ -187,6 +186,7 @@ Plots a continuous choropleth map layer.
 | `legend_title` | `str` | Label for the colourbar |
 | `vmin` | `float` | Minimum value for colour scale. Defaults to column min |
 | `vmax` | `float` | Maximum value for colour scale. Defaults to column max |
+| `cmap` | `str` | Colour map style. One of `"diverging"` (RdYlBu) or `"sequential"` (Blues). Defaults to `"diverging"` |
 | `reverse` | `bool` | If `True`, reverses the colourmap. Defaults to `False` |
 | `zorder` | `int` | Layer order. Defaults to `1` |
 
@@ -194,7 +194,6 @@ Plots a continuous choropleth map layer.
 
 ### `plot_static_categorical_choropleth(gdf, column, title, legend_title, categories, ...)`
 Plots a categorical choropleth map layer.
-
 | Parameter | Type | Description |
 |---|---|---|
 | `gdf` | `GeoDataFrame` | GeoDataFrame with data and geometry |
@@ -202,7 +201,8 @@ Plots a categorical choropleth map layer.
 | `title` | `str` | Map title |
 | `legend_title` | `str` | Label for the legend |
 | `categories` | `list` | Ordered list of category values, e.g. `["60-62", "62-64", "64-66", "66-68", "68+"]` |
-| `reverse` | `bool` | If `True`, reverses the colourmap. Defaults to `False` |
+| `cmap` | `str` | Colour map style. One of `"diverging"` (RdYlBu), `"sequential"` (Blues), or `"qualitative"` (Set2, max 8 categories). Defaults to `"diverging"` |
+| `reverse` | `bool` | If `True`, reverses the colourmap. No effect when `cmap="qualitative"`. Defaults to `False` |
 | `zorder` | `int` | Layer order. Defaults to `1` |
 
 ---
