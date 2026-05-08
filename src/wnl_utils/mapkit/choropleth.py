@@ -5,6 +5,33 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches 
 
 
+def _resolve_continuous_cmap(cmap, reverse):
+    """Returns a Matplotlib colormap name for continuous/sequential use."""
+    options = {
+        "diverging":  ("RdYlBu_r" if reverse else "RdYlBu"),
+        "sequential": ("Blues_r"  if reverse else "Blues"),
+    }
+    if cmap not in options:
+        raise ValueError(
+            f"Invalid cmap '{cmap}'. Choose from: {list(options.keys())}."
+        )
+    return options[cmap]
+
+
+def _resolve_categorical_cmap(cmap, reverse):
+    """Returns a Matplotlib colormap name for categorical use."""
+    options = {
+        "diverging":   ("RdYlBu_r" if reverse else "RdYlBu"),
+        "sequential":  ("Blues_r"  if reverse else "Blues"),
+        "qualitative": "Set2",   # reverse has no meaningful effect on qualitative
+    }
+    if cmap not in options:
+        raise ValueError(
+            f"Invalid cmap '{cmap}'. Choose from: {list(options.keys())}."
+        )
+    return options[cmap]
+
+
 def plot_static_continuous_choropleth(
     gdf,
     column,
@@ -14,11 +41,12 @@ def plot_static_continuous_choropleth(
     ax=None,
     vmin=None,
     vmax=None,
+    cmap="diverging",
     reverse=False,
     zorder=1,
 ):
-
     """Plots a choropleth map layer onto a Matplotlib axes.
+
     Args:
         gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
         column (str): Column name to use for the choropleth colour scale.
@@ -28,8 +56,11 @@ def plot_static_continuous_choropleth(
         ax (matplotlib.axes.Axes): Axes object to plot onto. Defaults to current canvas.
         vmin (float): Minimum value for the colour scale. Defaults to column minimum.
         vmax (float): Maximum value for the colour scale. Defaults to column maximum.
-        reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
+        cmap (str): Colour map style. One of "diverging" (RdYlBu) or "sequential" (Blues).
+            Defaults to "diverging".
+        reverse (bool): If True, reverses the colourmap. Defaults to False.
         zorder (int): Layering order. Higher values plot on top. Defaults to 1.
+
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
@@ -70,7 +101,7 @@ def plot_static_continuous_choropleth(
             "or pass an explicit ax argument."
         )
 
-    colormap = "RdYlBu_r" if reverse else "RdYlBu"
+    colormap = _resolve_continuous_cmap(cmap, reverse)
 
     vmin = gdf[column].min() if vmin is None else vmin
     vmax = gdf[column].max() if vmax is None else vmax
@@ -90,7 +121,7 @@ def plot_static_continuous_choropleth(
         linewidth=0.1,
         zorder=zorder,
         vmin=vmin,
-        vmax=vmax
+        vmax=vmax,
     )
     
     if title:
@@ -107,11 +138,12 @@ def plot_static_categorical_choropleth(
     title=None,
     fig=None,
     ax=None,
+    cmap="diverging",
     reverse=False,
     zorder=1,
 ):
-
     """Plots a categorical choropleth map layer onto a Matplotlib axes.
+
     Args:
         gdf (gpd.GeoDataFrame): GeoDataFrame with data and geometry column for plotting.
         column (str): Column name to use for the choropleth categories.
@@ -120,8 +152,12 @@ def plot_static_categorical_choropleth(
         categories (list): Ordered list of category values to display, e.g. range(1, 11).
         fig (matplotlib.figure.Figure): Figure object. Defaults to current canvas.
         ax (matplotlib.axes.Axes): Axes object to plot onto. Defaults to current canvas.
-        reverse (bool): If True, reverses the colourmap (RdYlBu_r). Defaults to False.
+        cmap (str): Colour map style. One of "diverging" (RdYlBu), "sequential" (Blues),
+            or "qualitative" (Set2). Defaults to "diverging".
+        reverse (bool): If True, reverses the colourmap (no effect for "qualitative").
+            Defaults to False.
         zorder (int): Layering order. Higher values plot on top. Defaults to 1.
+
     Returns:
         ax (matplotlib.axes.Axes): Axes object with choropleth layer added.
     """
@@ -162,7 +198,14 @@ def plot_static_categorical_choropleth(
             "or pass an explicit ax argument."
         )
 
-    colormap = "RdYlBu_r" if reverse else "RdYlBu"
+    colormap = _resolve_categorical_cmap(cmap, reverse)
+
+    if cmap == "qualitative" and categories is not None and len(categories) > 8:
+        raise ValueError(
+            f"qualitative cmap 'Set2' supports a maximum of 8 categories, "
+            f"but {len(categories)} were provided. Consider using cmap='diverging' "
+            "or 'sequential', or reducing the number of categories."
+        )
 
     if categories is not None:
         cat_type = type(categories[0])
@@ -175,8 +218,8 @@ def plot_static_categorical_choropleth(
 
         gdf[column] = pd.Categorical(gdf[column], categories=categories, ordered=True)
 
-        cmap = plt.colormaps[colormap].resampled(len(categories))
-        category_colors = {cat: matplotlib.colors.to_hex(cmap(i)) for i, cat in enumerate(categories)}
+        cmap_obj = plt.colormaps[colormap].resampled(len(categories))
+        category_colors = {cat: matplotlib.colors.to_hex(cmap_obj(i)) for i, cat in enumerate(categories)}
 
         colors = [category_colors.get(val, "#000000") for val in gdf[column]]
         
