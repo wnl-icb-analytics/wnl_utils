@@ -269,4 +269,190 @@ def test_categorical_choropleth_raises_on_unmatched_values(choropleth_gdf):
     plt.close("all")
 
 
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+CONTINUOUS_VALID_CMAPS = ["diverging", "sequential"]
+CATEGORICAL_VALID_CMAPS = ["diverging", "sequential", "qualitative"]
+
+
+def _get_legend_colors(ax):
+    """Return face colours from all legend patch handles on ax."""
+    return [h.get_facecolor() for h in ax.get_legend().legend_handles]
+
+
+
+# Continuous choropleth – cmap
+
+class TestContinuousChoropletCmap:
+
+    @pytest.mark.parametrize("cmap", CONTINUOUS_VALID_CMAPS)
+    def test_valid_cmap_returns_axes(self, choropleth_gdf, cmap):
+        """Each valid cmap string should run without error and return an Axes."""
+        fig, ax = plt.subplots()
+        result = plot_static_continuous_choropleth(
+            choropleth_gdf, column="TEST_COLUMN", legend_title="Legend", ax=ax, fig=fig, cmap=cmap
+        )
+        assert isinstance(result, Axes)
+        plt.close("all")
+
+    def test_invalid_cmap_raises(self, choropleth_gdf):
+        """An unrecognised cmap value should raise ValueError."""
+        fig, ax = plt.subplots()
+        with pytest.raises(ValueError, match="Invalid cmap"):
+            plot_static_continuous_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend", ax=ax, fig=fig, cmap="qualitative"
+            )
+        plt.close("all")
+
+    @pytest.mark.parametrize("cmap", CONTINUOUS_VALID_CMAPS)
+    def test_reverse_produces_different_colorbar_than_default(self, choropleth_gdf, cmap):
+        """reverse=True should yield a different colormap to reverse=False for every valid cmap."""
+        def _get_colormap_name(reverse):
+            fig, ax = plt.subplots()
+            result = plot_static_continuous_choropleth(
+                choropleth_gdf,
+                column="TEST_COLUMN",
+                legend_title="Legend",
+                ax=ax,
+                fig=fig,
+                cmap=cmap,
+                reverse=reverse,
+            )
+            # The colormap is stored on the polycollection drawn by geopandas
+            cmap_name = result.collections[0].cmap.name
+            plt.close("all")
+            return cmap_name
+
+        assert _get_colormap_name(reverse=False) != _get_colormap_name(reverse=True)
+
+    @pytest.mark.parametrize("bad_cmap", ["qualitative", "plasma", "viridis", "", None])
+    def test_various_invalid_cmaps_raise(self, choropleth_gdf, bad_cmap):
+        """Any value outside the accepted set should raise ValueError."""
+        fig, ax = plt.subplots()
+        with pytest.raises((ValueError, TypeError)):
+            plot_static_continuous_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend", ax=ax, fig=fig, cmap=bad_cmap
+            )
+        plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# Categorical choropleth – cmap
+# ---------------------------------------------------------------------------
+
+class TestCategoricalChoropletCmap:
+
+    @pytest.mark.parametrize("cmap", CATEGORICAL_VALID_CMAPS)
+    def test_valid_cmap_returns_axes(self, choropleth_gdf, cmap):
+        """Each valid cmap string should run without error and return an Axes."""
+        fig, ax = plt.subplots()
+        result = plot_static_categorical_choropleth(
+            choropleth_gdf, column="TEST_COLUMN", legend_title="Legend", ax=ax, fig=fig,
+            categories=[3], cmap=cmap
+        )
+        assert isinstance(result, Axes)
+        plt.close("all")
+
+    @pytest.mark.parametrize("bad_cmap", ["plasma", "viridis", "RdYlBu", "", None])
+    def test_invalid_cmap_raises(self, choropleth_gdf, bad_cmap):
+        """An unrecognised cmap value should raise ValueError."""
+        fig, ax = plt.subplots()
+        with pytest.raises((ValueError, TypeError)):
+            plot_static_categorical_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend", ax=ax, fig=fig,
+                categories=[3], cmap=bad_cmap
+            )
+        plt.close("all")
+
+    @pytest.mark.parametrize("cmap", ["diverging", "sequential"])
+    def test_reverse_produces_different_colors(self, choropleth_gdf, cmap):
+        """reverse=True should produce different legend colours for diverging and sequential cmaps."""
+        categories = [1, 2, 3]
+
+        def _colors(reverse):
+            fig, ax = plt.subplots()
+            plot_static_categorical_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend",
+                categories=categories, ax=ax, fig=fig, cmap=cmap, reverse=reverse,
+            )
+            cols = _get_legend_colors(ax)
+            plt.close("all")
+            return cols
+
+        assert _colors(reverse=False) != _colors(reverse=True)
+
+    def test_qualitative_cmap_reverse_has_no_effect(self, choropleth_gdf):
+        """reverse has no meaningful effect on the qualitative cmap; colours should be identical."""
+        categories = [1, 2, 3]
+
+        def _colors(reverse):
+            fig, ax = plt.subplots()
+            plot_static_categorical_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend",
+                categories=categories, ax=ax, fig=fig, cmap="qualitative", reverse=reverse,
+            )
+            cols = _get_legend_colors(ax)
+            plt.close("all")
+            return cols
+
+        assert _colors(reverse=False) == _colors(reverse=True)
+
+    def test_qualitative_cmap_raises_above_8_categories(self, choropleth_gdf):
+        """qualitative cmap should raise ValueError when more than 8 categories are supplied."""
+        fig, ax = plt.subplots()
+        with pytest.raises(ValueError, match="maximum of 8 categories"):
+            plot_static_categorical_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend",
+                categories=list(range(1, 10)),  # 9 categories
+                ax=ax, fig=fig, cmap="qualitative",
+            )
+        plt.close("all")
+
+    def test_qualitative_cmap_accepts_exactly_8_categories(self, choropleth_gdf):
+        """qualitative cmap should accept exactly 8 categories without error."""
+        fig, ax = plt.subplots()
+
+        # Extend the fixture data to cover all 8 categories
+        import geopandas as gpd
+        from shapely.geometry import Point
+        poly = choropleth_gdf.geometry.iloc[0]
+        extended_gdf = gpd.GeoDataFrame(
+            {"AREA_NAME": [f"Borough {i}" for i in range(1, 9)],
+             "TEST_COLUMN": list(range(1, 9))},
+            geometry=[poly] * 8,
+            crs="EPSG:4326",
+        )
+
+        result = plot_static_categorical_choropleth(
+            extended_gdf, column="TEST_COLUMN", legend_title="Legend",
+            categories=list(range(1, 9)),
+            ax=ax, fig=fig, cmap="qualitative",
+        )
+        assert isinstance(result, Axes)
+        plt.close("all")
+
+    @pytest.mark.parametrize("cmap", CATEGORICAL_VALID_CMAPS)
+    def test_different_cmaps_produce_different_colors(self, choropleth_gdf, cmap):
+        """Each valid cmap should produce visually distinct colours from the others."""
+        categories = [1, 2, 3]
+
+        def _colors(c):
+            fig, ax = plt.subplots()
+            plot_static_categorical_choropleth(
+                choropleth_gdf, column="TEST_COLUMN", legend_title="Legend",
+                categories=categories, ax=ax, fig=fig, cmap=c,
+            )
+            cols = _get_legend_colors(ax)
+            plt.close("all")
+            return cols
+
+        other_cmaps = [c for c in CATEGORICAL_VALID_CMAPS if c != cmap]
+        colors_under_test = _colors(cmap)
+        for other in other_cmaps:
+            assert colors_under_test != _colors(other), (
+                f"cmap='{cmap}' produced the same colours as cmap='{other}'"
+            )
+
 
