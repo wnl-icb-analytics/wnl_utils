@@ -112,10 +112,10 @@ def plot_static_continuous_choropleth(
         column=column,
         cmap=colormap,
         ax=ax,
+        cax=cax, 
         legend=True,
         legend_kwds={
             "label": legend_title,
-            "cax": cax,
         },
         edgecolor="black",
         linewidth=0.1,
