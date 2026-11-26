@@ -1,0 +1,81 @@
+# Test and build the wnl-utils wheel, and on main upload it to the Snowflake stage.
+#
+# Logs in with a key pair as the service user SVC__GITHUB__WNL_UTILS.
+# Secrets:
+#   SNOWFLAKE_ACCOUNT        account identifier
+#   SNOWFLAKE__USERNAME      service user name
+#   SNOWFLAKE__PRIVATE_KEY   encrypted PKCS#8 private key (PEM text)
+#   SNOWFLAKE__PASSPHRASE    private key passphrase
+#
+# Tests and the wheel build run on every push to main and on pull requests, so a
+# branch can be checked. Only main uploads: deploy/snowflake_upload.sql creates the
+# stage if needed, PUTs the wheel to @"STG__PYTHON_FILES"/wnl-utils/ (overwriting
+# the same version) and grants read to ENGINEER and ANALYST.
+name: build-deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: &paths
+      - pyproject.toml
+      - uv.lock
+      - src/**
+      - tests/**
+      - deploy/**
+      - .github/workflows/deploy.yml
+  pull_request:
+    paths: *paths
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # snow CLI temporary connection (-x), so no connections.toml is needed
+      SNOW: >-
+        -x --account ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        --user ${{ secrets.SNOWFLAKE__USERNAME }}
+        --authenticator SNOWFLAKE_JWT
+        --private-key-file /home/runner/.snowflake/rsa_key.p8
+      PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE__PASSPHRASE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run tests
+        run: uv run pytest
+
+      - name: Build wheel
+        run: uv build --wheel
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+      - name: Write private key
+        if: github.ref == 'refs/heads/main'
+        env:
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE__PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.snowflake
+          printf '%s\n' "$SNOWFLAKE_PRIVATE_KEY" > ~/.snowflake/rsa_key.p8
+          chmod 600 ~/.snowflake/rsa_key.p8
+
+      - name: Install Snowflake CLI
+        if: github.ref == 'refs/heads/main'
+        run: pipx install snowflake-cli
+
+      - name: Upload wheel to stage
+        if: github.ref == 'refs/heads/main'
+        run: |
+          whl=$(ls "$GITHUB_WORKSPACE"/dist/*.whl)
+          echo "Uploading $whl"
+          snow sql -f deploy/snowflake_upload.sql -D "whl_path=$whl" $SNOW
